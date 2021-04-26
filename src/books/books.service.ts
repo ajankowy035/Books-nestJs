@@ -1,30 +1,53 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from '@nestjs/mongoose';
+import { Model} from 'mongoose';
+
 import { Book } from './book.model';
 
 @Injectable()
 export class BooksService{
-    private books: Book[];
+    constructor(
+        @InjectModel('Book') private readonly bookModel: Model<Book>,
+    ){}
 
-    addBook(title: string, desc: string, author: string, price: number){
-        const bookId = Math.random().toString();
-        const newBook = new Book(bookId, title, desc, author, price);
+    async addBook(title: string, desc: string, author: string, price: number){
+        const newBook = new this.bookModel( {
+            title, 
+            desc, 
+            author, 
+            price
+        });
 
-        return bookId;
+        const result = await newBook.save();
+        return result.id as string;
     }
 
-    getBooks(){
-        return [...this.books];
+    async getBooks(){
+        const books = await this.bookModel.find().exec();
+        return books.map(book => ({
+            id: book.id,
+            title: book.title,
+            desc: book.desc,
+            author: book.author,
+            price: book.price
+            
+        }));
     }
 
-    getOneBook(bookId: string){
-        const book = this.findBook(bookId)[0];
+    async getOneBook(bookId: string){
+        const book = await this.findBook(bookId);
 
-        return {...book};
+        return {
+            id: book.id,
+            title: book.title,
+            desc: book.desc,
+            author: book.author,
+            price: book.price
+        };;
     }
 
-    updateBook(bookId: string, title: string, description: string, author: string, price: number){
-        const [ book, index ] = this.findBook(bookId);
-        const updatedBook = {...book};
+    async updateBook(bookId: string, title: string, description: string, author: string, price: number){
+        const updatedBook = await this.findBook(bookId);
 
         if(title){
             updatedBook.title = title;
@@ -38,26 +61,32 @@ export class BooksService{
         if(price){
             updatedBook.price = price;
         }
-
-        this.books[index] = updatedBook;
+        updatedBook.save();
+        
         
     }
 
-    deleteBook(id: string){
-        const [ _, index] = this.findBook(id);
-        const updatedBooks = this.books.filter(book => book.id!== id);
-        return [...updatedBooks];
+    async deleteBook(id: string){
+        const result = await this.bookModel.deleteOne({_id: id }).exec();
+        if(result === 0){
+            throw new NotFoundException('Could not find a book');
+
+        }
     }
 
 
-    private findBook(id: string):[Book, number]{
-        const bookIndex = this.books.findIndex(book=> book.id === id);
-        const book = this.books[bookIndex];
-        if(!book){
-            throw new NotFoundException('There is no book with that id');
+    private async findBook(id: string):Promise<Book>{
+        let book;
+        try{
+            book = await this.bookModel.findById(id).exec();
+        }catch(err){
+            throw new NotFoundException('Could not find a book');
         }
 
-        return [book, bookIndex]
+        if(!book){
+            throw new NotFoundException('Could not find a book');
+        }
+        return book;
 
     }
 }

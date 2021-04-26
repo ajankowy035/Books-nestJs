@@ -6,42 +6,43 @@ export class BooksController{
     constructor(private readonly booksService: BooksService){}
 
     @Post()
-    addBook(
+    async addBook(
         @Body('title') bTitle: string,
         @Body('description') bDesc: string,
         @Body('author') bAuthor: string,
         @Body('price') bPrice: number
     ){
-        const generateId = this.booksService.addBook(bTitle, bDesc, bAuthor, bPrice);
+        const generateId = await this.booksService.addBook(bTitle, bDesc, bAuthor, bPrice);
         return  {id: generateId};
     }
 
     @Get()
-    getAllBooks(){
-        return this.booksService.getBooks();
+    async getAllBooks(){
+        const products = await this.booksService.getBooks();
+        return products;
     }
 
     @Get(':id')
-    getOneBook(
+    async getOneBook(
         @Param('id') bId: string){
-        return this.booksService.getOneBook(bId);
+        return await this.booksService.getOneBook(bId);
     }
 
     @Patch(':id')
-    updateBook(
+    async updateBook(
         @Param('id') bId: string,
         @Body('title') bTitle: string,
         @Body('description') bDesc: string,
         @Body('author') bAuthor: string,
         @Body('price') bPrice: number
     ){
-        this.booksService.updateBook(bId, bTitle, bDesc, bAuthor, bPrice);
+        await this.booksService.updateBook(bId, bTitle, bDesc, bAuthor, bPrice);
         return null;
     }
 
     @Delete(':id')
-    deleteBook(@Param('id') bId: string){
-        this.booksService.deleteBook(bId);
+    async deleteBook(@Param('id') bId: string){
+        await this.booksService.deleteBook(bId);
         return null;
     }
 }
