@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from "@nestjs/common";
 import { BooksService } from "./books.service";
 
 @Controller('books')
@@ -11,14 +11,23 @@ export class BooksController{
         @Body('description') bDesc: string,
         @Body('author') bAuthor: string,
         @Body('price') bPrice: number
-    ){
-        const generateId = await this.booksService.addBook(bTitle, bDesc, bAuthor, bPrice);
-        return  {id: generateId};
+        ){
+        const book = await this.booksService.create(
+            bTitle,
+            bDesc,
+            bAuthor,
+            bPrice
+        );
+        return  {
+            statusCode: HttpStatus.OK,
+            message: 'Book added!',
+            data: book
+        };
     }
 
     @Get()
     async getAllBooks(){
-        const products = await this.booksService.getBooks();
+        const products = await this.booksService.findAll();
         return products;
     }
 

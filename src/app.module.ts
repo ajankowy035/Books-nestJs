@@ -9,7 +9,7 @@ import { BooksModule } from './books/books.module';
   imports: [
     BooksModule,
     MongooseModule.forRoot(
-      'mongodb+srv://user:140197@cluster0.l09j.mongodb.net/nestBooks?retryWrites=true&w=majority',
+      'mongodb+srv://user:123456aga@cluster0.l0d9j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
     ),
   ],
   controllers: [AppController],

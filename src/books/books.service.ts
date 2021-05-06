@@ -3,23 +3,22 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model} from 'mongoose';
 
 import { Book } from './book.model';
+// import { CreateBookDto } from './dto/book.dto';
 
 @Injectable()
 export class BooksService{
     constructor(
-        @InjectModel('Book') private readonly bookModel: Model<Book>,
+        @InjectModel('Book') private bookModel: Model<Book>
     ){}
 
-    async addBook(title: string, desc: string, author: string, price: number){
-        const newBook = new this.bookModel( {
-            title, 
-            desc, 
-            author, 
-            price
-        });
+    async create(title: string, desc: string, author: string, price: number): Promise<Book> {
+        const createdBook = new this.bookModel;
+        const result = createdBook.save();
+        return result;
+    }
 
-        const result = await newBook.save();
-        return result.id as string;
+    async findAll(): Promise<Book[]> {
+        return this.bookModel.find().exec();
     }
 
     async getBooks(){
@@ -38,7 +37,7 @@ export class BooksService{
         const book = await this.findBook(bookId);
 
         return {
-            id: book.id,
+            // id: book.id,
             title: book.title,
             desc: book.desc,
             author: book.author,
@@ -68,7 +67,7 @@ export class BooksService{
 
     async deleteBook(id: string){
         const result = await this.bookModel.deleteOne({_id: id }).exec();
-        if(result === 0){
+        if(!result){
             throw new NotFoundException('Could not find a book');
 
         }

@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import * as mongoose from "mongoose";
 
 export const BookSchema = new mongoose.Schema({
     title: {type: String, require: true},
@@ -8,9 +8,9 @@ export const BookSchema = new mongoose.Schema({
 })
 
 export interface Book extends mongoose.Document{
-    id: string,
-    title: string,
-    desc: string, 
-    author: string,
-    price: number
+    id: string;
+    title: string;
+    desc: string; 
+    author: string;
+    price: number;
 }
